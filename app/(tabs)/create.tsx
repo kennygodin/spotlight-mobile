@@ -1,6 +1,13 @@
 import CreateHeader from "@/components/tabs/create-header";
+import { CreatePostPayload } from "@/types/post.types";
+import { createPost } from "@/services/post.service";
+
+import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@clerk/clerk-expo";
+import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { AxiosError } from "axios";
 import { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -12,12 +19,14 @@ import {
   View,
   Image,
   TextInput,
+  Alert,
 } from "react-native";
 
-import * as ImagePicker from "expo-image-picker";
-
 export default function Create() {
+  const { getToken } = useAuth();
   const router = useRouter();
+  const queryClient = new QueryClient();
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [caption, setCaption] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +44,80 @@ export default function Create() {
     }
   };
 
+  const createPostMutation = useMutation({
+    mutationFn: async (data: CreatePostPayload) => {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      const formData = new FormData();
+
+      if (data.content) {
+        formData.append("content", data.content);
+      }
+
+      if (data.imageUrl) {
+        const imageUri = data.imageUrl;
+        const filename = imageUri.split("/").pop() || "image.jpg";
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : "image/jpeg";
+
+        formData.append("image", {
+          uri: imageUri,
+          type: type,
+          name: filename,
+        } as any);
+      }
+
+      return await createPost(formData, token);
+    },
+    onSuccess: (response) => {
+      console.log("Post created successfully:", response);
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+
+      setSelectedImage(null);
+      setCaption("");
+      setIsSubmitting(false);
+      router.push("/home");
+    },
+    onError: (error: unknown) => {
+      setIsSubmitting(false);
+
+      if (error instanceof Error) {
+        if ((error as AxiosError)?.isAxiosError) {
+          const axiosErr = error as AxiosError<{ message?: string }>;
+          console.log("Axios error:", axiosErr);
+          Alert.alert(
+            "Error",
+            axiosErr.response?.data?.message || "Failed to create post"
+          );
+          return;
+        }
+      }
+
+      console.log("Unknown error:", error);
+      Alert.alert("Error", "Something went wrong while creating the post!");
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!selectedImage) {
+      Alert.alert("Error", "Please select an image");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const postData: CreatePostPayload = {
+      imageUrl: selectedImage,
+      content: caption.trim() || undefined,
+    };
+
+    createPostMutation.mutate(postData);
+  };
+
   if (!selectedImage) {
     return (
       <SafeAreaView className="flex-1 bg-black">
@@ -42,7 +125,7 @@ export default function Create() {
           selectedImage={false}
           isSubmitting={isSubmitting}
           setSelectedImage={setSelectedImage}
-          onSubmit={() => {}}
+          onSubmit={handleSubmit}
         />
         <TouchableOpacity
           onPress={pickImage}
@@ -66,7 +149,7 @@ export default function Create() {
           selectedImage={true}
           isSubmitting={isSubmitting}
           setSelectedImage={setSelectedImage}
-          onSubmit={() => {}}
+          onSubmit={handleSubmit}
         />
 
         <ScrollView
@@ -94,6 +177,7 @@ export default function Create() {
 
               <TouchableOpacity
                 onPress={pickImage}
+                disabled={isSubmitting}
                 className="absolute bottom-2 right-2 flex-row items-center gap-1 bg-black/60 px-3 py-1 rounded-full"
               >
                 <Ionicons name="image-outline" color="#fff" size={16} />
@@ -102,15 +186,16 @@ export default function Create() {
             </View>
           </View>
 
-          <View>
+          <View className="p-4">
             <TextInput
               placeholder="Write a caption..."
-              className="text-white"
-              placeholderTextColor={"#1f2937"}
+              className="text-white text-base min-h-[100px]"
+              placeholderTextColor={"#9ca3af"}
               multiline
               value={caption}
               onChangeText={(text) => setCaption(text)}
               editable={!isSubmitting}
+              style={{ textAlignVertical: "top" }}
             />
           </View>
         </ScrollView>
