@@ -1,19 +1,17 @@
-export interface SyncUserPayload {
-  email: string;
-  name: string;
-  clerkId: string;
-  avatar: string;
-}
-
 export interface User {
   id: string;
-  clerkId: string;
   email: string;
-  name: string;
   username?: string;
-  avatar?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface SyncUserResponse extends User {}
+export interface UserResponse {
+  user: User;
+  status: string;
+  message: string;
+}

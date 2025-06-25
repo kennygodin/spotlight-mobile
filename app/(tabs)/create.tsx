@@ -8,7 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -21,6 +21,7 @@ import {
   TextInput,
   Alert,
 } from "react-native";
+import { useUsernameCheck } from "@/hooks/useUsernameCheck";
 
 export default function Create() {
   const { getToken } = useAuth();
@@ -28,10 +29,46 @@ export default function Create() {
   const queryClient = new QueryClient();
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const {
+    hasUsername,
+    needsUsername,
+    isLoading: userLoading,
+  } = useUsernameCheck();
   const [caption, setCaption] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    console.log(needsUsername)
+    if (!userLoading && needsUsername) {
+      Alert.alert(
+        "Complete Your Profile",
+        "Please set up your username before creating posts.",
+        [
+          {
+            text: "Set Up Profile",
+            onPress: () => router.push("/profile"),
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    }
+  }, [needsUsername, userLoading, router]);
+
   const pickImage = async () => {
+    if (needsUsername) {
+      Alert.alert("Profile Incomplete", "Please complete your profile first.", [
+        {
+          text: "Go to Profile",
+          onPress: () => router.push("/profile"),
+        },
+      ]);
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
@@ -194,7 +231,7 @@ export default function Create() {
               multiline
               value={caption}
               onChangeText={(text) => setCaption(text)}
-              editable={!isSubmitting}
+              editable={!isSubmitting && hasUsername}
               style={{ textAlignVertical: "top" }}
             />
           </View>

@@ -13,7 +13,11 @@ export default function Home() {
     const protectedRoutes = async () => {
       try {
         const token = await getToken();
-        
+
+        if (!token) {
+          return null;
+        }
+
         const response = await axiosInstance.get("/protected", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -29,25 +33,12 @@ export default function Home() {
     protectedRoutes();
   }, []);
 
-  // const logToken = async () => {
-  //   try {
-  //     const token = await getToken();
-  //     console.log("JWT Token:", token);
-  //     // Copy this token from your console
-  //   } catch (error) {
-  //     console.error("Error getting token:", error);
-  //   }
-  // };
-
-  // // Call this function or add a button to trigger it
-  // logToken();
-
   return (
     <SafeAreaView className="flex-1 bg-black">
       <ScrollView>
         <Reels />
-        <PostCard />
-        <PostCard />
+        {/* <PostCard />
+        <PostCard /> */}
       </ScrollView>
     </SafeAreaView>
   );

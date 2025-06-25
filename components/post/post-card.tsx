@@ -1,44 +1,78 @@
+import { Post } from "@/types/post.types";
 import { useUser } from "@clerk/clerk-expo";
-
 import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-export default function PostCard() {
+interface PostCardProps {
+  post: Post;
+}
+
+export default function PostCard({ post }: PostCardProps) {
   const { user } = useUser();
+
   return (
-    <View className="py-2">
-      <View className="flex-row items-center px-1">
-        <View className="flex-row items-center gap-x-2">
-          <View className="w-10 h-10 rounded-full overflow-hidden">
-            <Image source={{ uri: user?.imageUrl }} className="w-full h-full" />
+    <View className="bg-zinc-900 rounded-lg p-4 mb-4">
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center">
+          <Image
+            source={{
+              uri:
+                post.user.imageUrl ||
+                user?.imageUrl ||
+                "https://via.placeholder.com/40",
+            }}
+            className="w-10 h-10 rounded-full mr-3"
+          />
+          <View>
+            <Text className="text-white font-semibold">
+              {post.user.firstName && post.user.lastName
+                ? `${post.user.firstName} ${post.user.lastName}`
+                : post.user.username ||
+                  user?.emailAddresses[0].emailAddress.split("@")[0]}
+            </Text>
+            {post.user.username && (
+              <Text className="text-gray-400 text-sm">
+                @{post.user.username}
+              </Text>
+            )}
           </View>
-          <Text className="text-white font-bold">
-            {user?.emailAddresses[0].emailAddress.split("@")[0]}
-          </Text>
         </View>
-        <TouchableOpacity
-          className="ml-auto"
-          onPress={() => console.log("Options tapped!")}
-        >
-          <Ionicons name="ellipsis-horizontal" size={24} color="white" />
+
+        <TouchableOpacity onPress={() => console.log("Options tapped!")}>
+          <Ionicons name="ellipsis-horizontal" size={20} color="#9CA3AF" />
         </TouchableOpacity>
       </View>
-      <View className="w-full h-80 my-2">
+
+      {post.content && <Text className="text-white mb-3">{post.content}</Text>}
+
+      {post.imageUrl && (
         <Image
-          className="w-full h-full"
-          source={{
-            uri: "https://images.unsplash.com/photo-1455849318743-b2233052fcff?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          }}
+          source={{ uri: post.imageUrl }}
+          className="w-full h-64 rounded-lg mb-3"
+          resizeMode="cover"
         />
-      </View>
-      <View className="flex-row gap-x-4 items-center px-1">
-        <Ionicons name="heart" size={24} color="#fff" />
-        <Ionicons name="chatbubble-outline" size={24} color="#fff" />
-        <Ionicons name="bookmark" size={24} color="#fff" className="ml-auto" />
-      </View>
-      <View className="gap-y-1 px-1 mt-2">
-        <Text className="text-white">2 likes</Text>
-        <Text className="text-sm text-gray-400">about 2 hours ago</Text>
+      )}
+
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center">
+          <TouchableOpacity className="flex-row items-center mr-4">
+            <Ionicons name="heart-outline" size={20} color="#9CA3AF" />
+            <Text className="text-gray-400 ml-1">
+              {post._count?.likes || 0} likes
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="flex-row items-center">
+            <Ionicons name="chatbubble-outline" size={20} color="#9CA3AF" />
+            <Text className="text-gray-400 ml-1">
+              {post._count?.comments || 0} comments
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text className="text-gray-500 text-sm">
+          {new Date(post.createdAt).toLocaleDateString()}
+        </Text>
       </View>
     </View>
   );
