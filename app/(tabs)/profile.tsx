@@ -29,7 +29,15 @@ export default function Profile() {
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
   const { data: currentUser, isLoading: userLoading } = useCurrentUser();
-  const { data: myPosts, isLoading: myPostLoading, error } = useFetchMyPosts();
+  const {
+    data: myPosts,
+    isLoading: myPostLoading,
+    error,
+    refetch,
+  } = useFetchMyPosts();
+
+  console.log("MY POSTS", myPosts);
+  console.log(error);
 
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -236,24 +244,14 @@ export default function Profile() {
           )}
         </View>
 
-        <View className="flex-row mt-3 gap-2">
-          <TouchableOpacity
-            onPress={() => setEditProfileVisible(true)}
-            className="flex-row items-center justify-center bg-slate-800 flex-1 py-2 rounded-md"
-          >
-            <Text className="text-base text-white ml-4 font-bold">
-              Edit Profile
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-center bg-slate-800 w-max py-2 px-2 rounded-md">
-            <Ionicons
-              name="log-out-outline"
-              size={20}
-              color="white"
-              className="-rotate-90"
-            />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          onPress={() => setEditProfileVisible(true)}
+          className="mt-3 flex-row items-center justify-center bg-slate-800 flex-1 py-2 rounded-md"
+        >
+          <Text className="text-base text-white ml-4 font-bold">
+            Edit Profile
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -270,7 +268,7 @@ export default function Profile() {
           </Text>
           <View style={{ width: 24 }} />
         </View>
-        
+
         <View className="flex-1 items-center justify-center px-4">
           <Image
             source={{ uri: selectedImage }}
@@ -284,10 +282,10 @@ export default function Profile() {
               console.log("Image load error:", error);
             }}
             onLoad={() => {
-              console.log("Image loaded successfully");
+              // console.log("Image loaded successfully");
             }}
           />
-          
+
           <TouchableOpacity
             onPress={pickImage}
             className="mt-4 flex-row items-center gap-2 bg-slate-800 px-4 py-2 rounded-full"
@@ -306,7 +304,9 @@ export default function Profile() {
             {updateProfileImageMutation.isPending ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text className="text-white font-semibold">Save Profile Picture</Text>
+              <Text className="text-white font-semibold">
+                Save Profile Picture
+              </Text>
             )}
           </TouchableOpacity>
         </View>
@@ -333,8 +333,7 @@ export default function Profile() {
           showsVerticalScrollIndicator={false}
           refreshing={myPostLoading}
           onRefresh={() => {
-            // You can add refetch logic here if your hook supports it
-            // For example: refetch();
+            refetch();
           }}
           ListEmptyComponent={() => {
             if (myPostLoading) {

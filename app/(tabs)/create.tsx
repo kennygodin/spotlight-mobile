@@ -2,7 +2,7 @@ import CreateHeader from "@/components/tabs/create-header";
 import { CreatePostPayload } from "@/types/post.types";
 import { createPost } from "@/services/post.service";
 
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-expo";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +26,7 @@ import { useUsernameCheck } from "@/hooks/useUsernameCheck";
 export default function Create() {
   const { getToken } = useAuth();
   const router = useRouter();
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const {
@@ -38,7 +38,6 @@ export default function Create() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    console.log(needsUsername)
     if (!userLoading && needsUsername) {
       Alert.alert(
         "Complete Your Profile",
@@ -47,11 +46,6 @@ export default function Create() {
           {
             text: "Set Up Profile",
             onPress: () => router.push("/profile"),
-          },
-          {
-            text: "Cancel",
-            style: "cancel",
-            onPress: () => router.back(),
           },
         ]
       );
@@ -112,7 +106,8 @@ export default function Create() {
     },
     onSuccess: (response) => {
       console.log("Post created successfully:", response);
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["feed-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["my-posts"] });
 
       setSelectedImage(null);
       setCaption("");
@@ -208,7 +203,7 @@ export default function Create() {
                   console.log("Image load error:", error);
                 }}
                 onLoad={() => {
-                  console.log("Image loaded successfully");
+                  // console.log("Image loaded successfully");
                 }}
               />
 

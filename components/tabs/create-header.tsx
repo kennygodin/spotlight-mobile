@@ -19,7 +19,7 @@ export default function CreateHeader({
 
   if (selectedImage) {
     return (
-      <View className="flex-row items-center justify-between px-4 py-4 border-b-[0.5px] border-gray-800">
+      <View className="flex-row items-center justify-between px-4 pb-4 border-b-[0.5px] border-gray-800">
         <TouchableOpacity
           disabled={isSubmitting}
           onPress={() => setSelectedImage(null)}
@@ -45,7 +45,7 @@ export default function CreateHeader({
     );
   }
   return (
-    <View className="flex-row items-center justify-between px-4 py-4 border-b-[0.5px] border-gray-800">
+    <View className="flex-row items-center justify-between px-4 pb-4 border-b-[0.5px] border-gray-800">
       <TouchableOpacity onPress={() => router.back()}>
         <Ionicons name="arrow-back" color="#22c55e" size={24} />
       </TouchableOpacity>

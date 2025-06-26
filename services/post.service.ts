@@ -40,3 +40,20 @@ export const getLoggedInUserPosts = async (
     throw new Error("Failed to fetch posts");
   }
 };
+
+export const getFeedPosts = async (
+  token: string
+): Promise<PostsResponse> => {
+  try {
+    const response = await axiosInstance.get<PostsResponse>(`/posts/feed-posts`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching my posts:", error);
+    throw new Error("Failed to fetch posts");
+  }
+};
