@@ -23,7 +23,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserData, updateProfileImage } from "@/services/user.service";
-import { useFetchMyPosts } from "@/hooks/useFetchMyPosts";
+import { useFetchUserPosts } from "@/hooks/useFetchUserPosts";
 
 export default function Profile() {
   const queryClient = useQueryClient();
@@ -34,10 +34,7 @@ export default function Profile() {
     isLoading: myPostLoading,
     error,
     refetch,
-  } = useFetchMyPosts();
-
-  console.log("MY POSTS", myPosts);
-  console.log(error);
+  } = useFetchUserPosts(currentUser?.clerkId!);
 
   const [editProfileVisible, setEditProfileVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

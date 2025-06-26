@@ -107,7 +107,7 @@ export default function Create() {
     onSuccess: (response) => {
       console.log("Post created successfully:", response);
       queryClient.invalidateQueries({ queryKey: ["feed-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["my-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["userPosts"] });
 
       setSelectedImage(null);
       setCaption("");

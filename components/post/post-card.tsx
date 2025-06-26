@@ -1,6 +1,7 @@
 import { Post } from "@/types/post.types";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface PostCardProps {
@@ -8,7 +9,13 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  const router = useRouter();
+
   const { user } = useUser();
+
+  const handleUserPress = () => {
+    router.push(`/user/${post.user.clerkId}`);
+  };
 
   return (
     <View className="bg-zinc-900 rounded-lg p-4 mb-4">
@@ -23,7 +30,7 @@ export default function PostCard({ post }: PostCardProps) {
             }}
             className="w-10 h-10 rounded-full mr-3"
           />
-          <View>
+          <TouchableOpacity onPress={handleUserPress}>
             <Text className="text-white font-semibold">
               {post.user.firstName && post.user.lastName
                 ? `${post.user.firstName} ${post.user.lastName}`
@@ -35,7 +42,7 @@ export default function PostCard({ post }: PostCardProps) {
                 @{post.user.username}
               </Text>
             )}
-          </View>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity onPress={() => console.log("Options tapped!")}>
