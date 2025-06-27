@@ -105,7 +105,6 @@ export default function Create() {
       return await createPost(formData, token);
     },
     onSuccess: (response) => {
-      console.log("Post created successfully:", response);
       queryClient.invalidateQueries({ queryKey: ["feed-posts"] });
       queryClient.invalidateQueries({ queryKey: ["userPosts"] });
 

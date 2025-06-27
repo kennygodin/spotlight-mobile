@@ -14,13 +14,20 @@ export default function PostCard({ post }: PostCardProps) {
   const { user } = useUser();
 
   const handleUserPress = () => {
-    router.push(`/user/${post.user.clerkId}`);
+    if (user?.id === post.user.clerkId) {
+      router.push("/(tabs)/profile");
+    } else {
+      router.push(`/user/${post.user.clerkId}`);
+    }
   };
 
   return (
     <View className="bg-zinc-900 rounded-lg p-4 mb-4">
       <View className="flex-row items-center justify-between mb-3">
-        <View className="flex-row items-center">
+        <TouchableOpacity
+          onPress={handleUserPress}
+          className="flex-row items-center"
+        >
           <Image
             source={{
               uri:
@@ -43,7 +50,7 @@ export default function PostCard({ post }: PostCardProps) {
               </Text>
             )}
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log("Options tapped!")}>
           <Ionicons name="ellipsis-horizontal" size={20} color="#9CA3AF" />

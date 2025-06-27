@@ -145,7 +145,7 @@ export default function UserProfile() {
       <SafeAreaView className="flex-1 bg-black">
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#22c55e" />
-          <Text className="text-gray-400 mt-4">Loading user posts...</Text>
+          <Text className="text-gray-400 mt-4">Loading posts...</Text>
         </View>
       </SafeAreaView>
     );
